@@ -10,7 +10,9 @@ const Home = () => {
   const documents = useQuery(api.documents.get);
 
   if ( documents === undefined) {
-    <p>Loading...</p>
+    return (
+      <p>Loading...</p>
+    )
   }
 
   return (
