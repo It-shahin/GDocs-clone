@@ -1,6 +1,7 @@
 "use client";
 
 
+import { useAuth } from "@clerk/nextjs";
 import { usePaginatedQuery } from "convex/react";
 import { Navbar } from "./navbar";
 import { TemplatesGallery } from "./templates-gallery";
@@ -10,11 +11,15 @@ import { useSearchParam } from "@/hooks/use-search-param";
 
 const Home = () => {
   const [search] = useSearchParam();
+  const { orgId } = useAuth();
   const {
     results,
     status,
     loadMore
-  } = usePaginatedQuery(api.documents.get, { search }, { initialNumItems: 5 });
+  } = usePaginatedQuery(api.documents.get, { 
+    search, 
+    organizationId: orgId ?? undefined,
+  }, { initialNumItems: 5 });
 
 
   return (
@@ -23,7 +28,7 @@ const Home = () => {
         <Navbar />
       </div>
       <div className="mt-16">
-        <TemplatesGallery />
+        <TemplatesGallery organizationId={orgId ?? undefined} />
         <DocumentsTable
           documents={results}
           loadMore={loadMore}
