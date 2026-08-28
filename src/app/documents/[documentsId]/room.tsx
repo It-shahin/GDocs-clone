@@ -13,7 +13,20 @@ export function Room({ children }: { children: ReactNode }) {
 
 
   return (
-    <LiveblocksProvider publicApiKey={"pk_dev__Nn7XYnqEGM6KEfTjmc3T7u2u-CSXVhuYJpCjHZJFl4YY87TU9CA69og0WJf_CnL"}>
+    <LiveblocksProvider 
+      throttle={16}
+      authEndpoint={async () => {
+        const endpoint = "/api/liveblocks-auth";
+        const room = params.documentsId as string;
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          body: JSON.stringify({ room }),
+        });
+
+        return await response.json();
+      }}
+    >
       <RoomProvider id={params.documentsId as string}>
         <ClientSideSuspense fallback={<div>Loading…</div>}>
           {children}
