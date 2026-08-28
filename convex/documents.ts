@@ -3,6 +3,25 @@ import { paginationOptsValidator } from "convex/server";
 
 import { mutation, query } from "./_generated/server";
 
+export const getByIds = query({
+  args: { ids: v.array(v.id("documents")) },
+  handler: async (ctx, { ids }) => {
+    const documents = [];
+
+    for (const id of ids) {
+      const document = await ctx.db.get(id);
+
+      if (document) {
+        documents.push({ id: document._id, name: document.title });
+      } else {
+        documents.push({ id, name: "[Removed]" });
+      }
+    }
+
+    return documents;
+  },
+});
+
 export const create = mutation({
   args: { 
     title: v.optional(v.string()), 
@@ -13,7 +32,7 @@ export const create = mutation({
     const user = await ctx.auth.getUserIdentity();
 
     if (!user) {
-      throw new ConvexError("Unathorized");
+      throw new ConvexError("Unauthorized");
     }
 
     const organizationId = (user.organization_id ?? user.org_id ?? args.organizationId ?? undefined) as
@@ -21,7 +40,7 @@ export const create = mutation({
     | undefined;
 
     return await ctx.db.insert("documents", {
-      title: args.title ?? "Untitled coument",
+      title: args.title ?? "Untitled document",
       ownerId: user.subject,
       organizationId,
       initialContent: args.initialContent,

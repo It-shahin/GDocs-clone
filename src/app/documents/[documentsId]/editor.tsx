@@ -24,9 +24,20 @@ import Highlight from "@tiptap/extension-highlight"
 import Link from "@tiptap/extension-link"
 
 import { FontSizeExtension } from "@/extensions/font-size";
-import { Ruler } from './Ruler'
+import { Ruler } from './Ruler';
 
-export const Editor = () => {
+import { useLiveblocksExtension } from "@liveblocks/react-tiptap";
+import { Threads } from './threads'
+
+interface EditorProps {
+    initialContent?: string;
+};
+
+export const Editor = ({ initialContent }: EditorProps) => {
+    const liveblocks = useLiveblocksExtension({
+        initialContent,
+        offlineSupport_experimental: true,
+    });
 
     const { setEditor } = useEditorStore();
 
@@ -63,9 +74,12 @@ export const Editor = () => {
         } 
     },
     extensions: [
-        StarterKit,
+      liveblocks,
+        StarterKit.configure({
+            history: false,
+         }),
         TaskList,
-      TaskItem.configure({
+    TaskItem.configure({
         nested: true,
       }),
       Table.configure({
@@ -91,7 +105,7 @@ export const Editor = () => {
       TextAlign.configure({
         types: ["heading", "paragraph"]
       }),
-      FontSizeExtension
+      FontSizeExtension,
     ],
   })
     return (
@@ -100,6 +114,7 @@ export const Editor = () => {
                 <Ruler />
                 <div className='min-w-max flex justify-center w-[816px] py-4 print:py-0 mx-auto print:w-full print:min-w-0'>
                     <EditorContent editor={editor} />
+                    <Threads editor={editor} />
                 </div>
             </div>
         </>
