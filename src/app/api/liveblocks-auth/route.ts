@@ -1,13 +1,40 @@
 import { Liveblocks } from "@liveblocks/node";
 import { ConvexHttpClient } from "convex/browser";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 
 import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 const liveblocks = new Liveblocks({
   secret: process.env.LIVEBLOCKS_SECRET_KEY!,
 });
+
+type LiveblocksAuthBody = {
+  room?: Id<"documents">;
+};
+
+const getOrganizationId = (
+  sessionOrganizationId: unknown,
+  activeOrganizationId: string | null | undefined,
+) => {
+  if (typeof sessionOrganizationId === "string" && sessionOrganizationId.length > 0) {
+    return sessionOrganizationId;
+  }
+
+  return activeOrganizationId ?? undefined;
+};
+
+const isMemberOfOrganization = async (organizationId: string, userId: string) => {
+  const clerk = await clerkClient();
+  const membership = await clerk.organizations.getOrganizationMembershipList({
+    organizationId,
+    userId: [userId],
+    limit: 1,
+  });
+
+  return membership.totalCount > 0;
+};
 
 export async function POST(req: Request) {
   const { orgId, sessionClaims } = await auth();
@@ -20,18 +47,29 @@ export async function POST(req: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const { room } = await req.json();
+  const { room } = (await req.json()) as LiveblocksAuthBody;
+
+  if (!room) {
+    return new Response("Room is required", { status: 400 });
+  }
+
   const document = await convex.query(api.documents.getById, { id: room });
 
   if (!document) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const organizationId = (sessionClaims.org_id ?? orgId) as string | undefined;
+  const organizationId = getOrganizationId(sessionClaims.org_id, orgId);
 
   const isOwner = document.ownerId === user.id;
-  const isOrganizationMember = 
+  const isCurrentOrganizationMember =
     !!(document.organizationId && document.organizationId === organizationId);
+  const isDocumentOrganizationMember =
+    !!document.organizationId &&
+    !isCurrentOrganizationMember &&
+    (await isMemberOfOrganization(document.organizationId, user.id));
+  const isOrganizationMember =
+    isCurrentOrganizationMember || isDocumentOrganizationMember;
 
   if (!isOwner && !isOrganizationMember) {
     console.log("Liveblocks auth denied", {

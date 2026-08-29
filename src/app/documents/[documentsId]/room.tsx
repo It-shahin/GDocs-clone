@@ -14,7 +14,12 @@ import { Id } from "../../../../convex/_generated/dataModel";
 
 type User = { id: string; name: string; avatar: string; color: string };
 
-export function Room({ children }: { children: ReactNode }) {
+interface RoomProps {
+  children: ReactNode;
+  organizationId?: string;
+}
+
+export function Room({ children, organizationId }: RoomProps) {
   const params = useParams();
 
   const [users, setUsers] = useState<User[]>([]);
@@ -22,13 +27,13 @@ export function Room({ children }: { children: ReactNode }) {
   const fetchUsers = useMemo(
     () => async () => {
       try {
-        const list = await getUsers();
+        const list = await getUsers(organizationId);
         setUsers(list);
       } catch {
         toast.error("Failed to fetch users");
       }
     },
-    [],
+    [organizationId],
   );
 
   useEffect(() => {
@@ -44,6 +49,9 @@ export function Room({ children }: { children: ReactNode }) {
 
         const response = await fetch(endpoint, {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({ room }),
         });
 
