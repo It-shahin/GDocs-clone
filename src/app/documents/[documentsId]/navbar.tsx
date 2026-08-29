@@ -47,6 +47,7 @@ import { Avatars } from "./avatars";
 import { DocumentInput } from "./document-input";
 import { api } from "../../../../convex/_generated/api";
 import { Doc } from "../../../../convex/_generated/dataModel";
+import { Inbox } from "./inbox";
 
 interface NavbarProps {
   data: Doc<"documents">;
@@ -264,6 +265,7 @@ export const Navbar = ({ data }: NavbarProps) => {
       </div>
       <div className="flex gap-3 items-center pl-6">
         <Avatars />
+        <Inbox />
         <OrganizationSwitcher
           afterCreateOrganizationUrl="/"
           afterLeaveOrganizationUrl="/"
