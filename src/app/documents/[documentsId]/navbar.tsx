@@ -42,7 +42,6 @@ import {
 } from "@/components/ui/menubar";
 import { useEditorStore } from "@/store/use-editor-store";
 
-// import { Inbox } from "./inbox";
 import { Avatars } from "./avatars";
 import { DocumentInput } from "./document-input";
 import { api } from "../../../../convex/_generated/api";
@@ -123,20 +122,20 @@ export const Navbar = ({ data }: NavbarProps) => {
           <Image src="/logo.svg" alt="Logo" width={36} height={36} />
         </Link>
         <div className="flex flex-col">
-          <DocumentInput />
+          <DocumentInput title={data.title} id={data._id} />
           <div className="flex">
             <Menubar className="border-none bg-transparent shadow-none h-auto p-0">
               <MenubarMenu>
                 <MenubarTrigger className="text-sm font-normal py-0.5 px-[7px] rounded-sm hover:bg-muted h-auto">
                   File
                 </MenubarTrigger>
-                <MenubarContent className="print:hidden">
+                <MenubarContent className="print:hidden bg-white">
                   <MenubarSub>
                     <MenubarSubTrigger>
                       <FileIcon className="size-4 mr-2" />
                       Save
                     </MenubarSubTrigger>
-                    <MenubarSubContent>
+                    <MenubarSubContent className="bg-white">
                       <MenubarItem onClick={onSaveJSON}>
                         <FileJsonIcon className="size-4 mr-2" />
                         JSON
@@ -186,10 +185,10 @@ export const Navbar = ({ data }: NavbarProps) => {
                 </MenubarContent>
               </MenubarMenu>
               <MenubarMenu>
-                <MenubarTrigger className="text-sm font-normal py-0.5 px-[7px] rounded-sm hover:bg-muted h-auto">
+                <MenubarTrigger className="text-sm bg-white font-normal py-0.5 px-[7px] rounded-sm hover:bg-muted h-auto">
                   Edit
                 </MenubarTrigger>
-                <MenubarContent>
+                <MenubarContent className="bg-white">
                   <MenubarItem onClick={() => editor?.chain().focus().undo().run()}>
                     <Undo2Icon className="size-4 mr-2" />
                     Undo <MenubarShortcut>⌘Z</MenubarShortcut>
@@ -201,13 +200,13 @@ export const Navbar = ({ data }: NavbarProps) => {
                 </MenubarContent>
               </MenubarMenu>
               <MenubarMenu>
-                <MenubarTrigger className="text-sm font-normal py-0.5 px-[7px] rounded-sm hover:bg-muted h-auto">
+                <MenubarTrigger className="text-sm bg-white font-normal py-0.5 px-[7px] rounded-sm hover:bg-muted h-auto">
                   Insert
                 </MenubarTrigger>
-                <MenubarContent>
+                <MenubarContent className="bg-white">
                   <MenubarSub>
                     <MenubarSubTrigger>Table</MenubarSubTrigger>
-                    <MenubarSubContent>
+                    <MenubarSubContent className="bg-white">
                       <MenubarItem onClick={() => insertTable({ rows: 1 , cols: 1 })}>
                         1 x 1
                       </MenubarItem>
@@ -228,13 +227,13 @@ export const Navbar = ({ data }: NavbarProps) => {
                 <MenubarTrigger className="text-sm font-normal py-0.5 px-[7px] rounded-sm hover:bg-muted h-auto">
                   Format
                 </MenubarTrigger>
-                <MenubarContent>
+                <MenubarContent className="bg-white">
                   <MenubarSub>
                     <MenubarSubTrigger>
                       <TextIcon className="size-4 mr-2" />
                       Text
                     </MenubarSubTrigger>
-                    <MenubarSubContent>
+                    <MenubarSubContent className="bg-white">
                       <MenubarItem onClick={() => editor?.chain().focus().toggleBold().run()}>
                         <BoldIcon className="size-4 mr-2" />
                         Bold <MenubarShortcut>⌘B</MenubarShortcut>

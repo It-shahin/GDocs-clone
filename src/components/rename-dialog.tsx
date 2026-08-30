@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useMutation } from "convex/react";
+import { useAuth } from "@clerk/nextjs";
 
 import {
   Dialog,
@@ -26,6 +27,7 @@ interface RenameDialogProps {
 
 export const RenameDialog = ({ documentId, initialTitle, children }: RenameDialogProps) => {
   const update = useMutation(api.documents.updateById);
+  const { orgId } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
 
   const [title, setTitle] = useState(initialTitle);
@@ -35,7 +37,11 @@ export const RenameDialog = ({ documentId, initialTitle, children }: RenameDialo
     e.preventDefault();
     setIsUpdating(true);
 
-    update({ id: documentId, title: title.trim() || "Untitled" })
+    update({
+      id: documentId,
+      title: title.trim() || "Untitled",
+      organizationId: orgId ?? undefined,
+    })
       .catch(() => toast.error("Something went wrong"))
       .then(() => toast.success("Document updated"))
       .finally(() => {
