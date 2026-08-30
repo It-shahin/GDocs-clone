@@ -135,7 +135,11 @@ export const removeById = mutation({
 });
 
 export const updateById = mutation({
-  args: { id: v.id("documents"), title: v.string() },
+  args: {
+    id: v.id("documents"),
+    title: v.string(),
+    organizationId: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     const user = await ctx.auth.getUserIdentity();
 
@@ -143,7 +147,7 @@ export const updateById = mutation({
       throw new ConvexError("Unauthorized");
     }
 
-    const organizationId = (user.organization_id ?? user.org_id ?? undefined) as
+    const organizationId = (user.organization_id ?? user.org_id ?? args.organizationId ?? undefined) as
       | string
       | undefined;
 
