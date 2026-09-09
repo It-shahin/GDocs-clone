@@ -1,208 +1,135 @@
-# Docs Clone
+# Collaborative Document Platform
 
-A Google Docs-inspired collaborative document editor built with Next.js, Convex, Clerk, Liveblocks, TipTap, Tailwind CSS, and shadcn/ui components.
+A real-time document workspace inspired by Google Docs, built with Next.js, TypeScript, Convex, Clerk, Liveblocks, and TipTap.
 
-The app lets authenticated users create documents from templates, edit rich text in a document-style editor, collaborate in real time, add comments, search documents, and manage personal or organization-scoped documents.
+## Overview
+
+This application gives authenticated users a focused workspace for creating, organizing, and editing rich-text documents. Documents can live in personal or Clerk organization contexts, while Convex provides persisted document metadata and indexed search. Liveblocks and TipTap power shared editing, presence, comments, mentions, notifications, and synchronized page-margin settings.
 
 ## Features
 
-- Authentication with Clerk
-- Personal and organization document workspaces
-- Create, rename, search, and delete documents
-- Template gallery for quickly starting new documents
-- Rich text editor powered by TipTap
-- Real-time collaborative editing with Liveblocks
-- Liveblocks comments, mentions, presence, and user resolution
-- Formatting toolbar with headings, fonts, font size, bold, italic, underline, colors, highlights, links, images, alignment, lists, task lists, spellcheck, undo, redo, and print
-- Convex backend for document storage, authorization-aware queries, mutations, and search indexes
-- Responsive UI built with Tailwind CSS and shadcn/ui-style Radix components
+- Clerk authentication with personal and organization workspace switching
+- Document creation from blank, proposal, letter, resume, and cover-letter templates
+- Paginated document lists with indexed title search
+- Rename, delete, and open-in-new-tab document actions
+- Rich-text editing with headings, font controls, colors, highlights, links, images, tables, lists, task lists, and alignment
+- Real-time collaborative editing with participant avatars and connection status
+- Anchored comments, mentions, unresolved threads, and inbox notifications
+- Shared page-margin controls, print styling, spellcheck, undo, and redo
+- Export to JSON, HTML, plain text, or PDF through the browser print flow
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 App Router
-- **Language:** TypeScript
-- **UI:** React, Tailwind CSS, Radix UI, shadcn/ui components, Lucide icons
-- **Authentication:** Clerk
-- **Database / Backend:** Convex
-- **Collaboration:** Liveblocks
-- **Editor:** TipTap
-- **State:** Zustand
-- **Notifications:** Sonner
+### Application
 
-## Prerequisites
+- Next.js 15 App Router
+- React 19 release candidate
+- TypeScript
+- Tailwind CSS
+- Radix UI primitives with a shadcn/ui configuration
 
-Before running the project, make sure you have:
+### Data and Authentication
 
-- Node.js 18.18 or newer
-- npm
+- Convex for document data, mutations, pagination, and indexed search
+- Clerk for authentication and organization context
+
+### Collaboration and Editing
+
+- Liveblocks for collaborative rooms, presence, comments, mentions, notifications, and shared storage
+- TipTap for the rich-text editor
+- Zustand for sharing the active editor instance across controls
+
+## Architecture
+
+The Next.js App Router renders the document dashboard and editor interface. Clerk supplies user and organization identity to the client and Convex, while Convex queries and mutations store and retrieve document records. Each editor is associated with a Liveblocks room keyed by the document ID; a Next.js route handler validates the requesting user against document ownership or organization membership before issuing room access. TipTap renders the editor and connects its collaborative state to Liveblocks.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js and npm
 - A Clerk application
 - A Convex project
 - A Liveblocks project
 
-## Getting Started
-
-1. Clone the repository:
+### Installation
 
 ```bash
-git clone https://github.com/It-shahin/GDocs-clone
-cd docs-clone
+git clone https://github.com/It-shahin/GDocs-clone.git
+cd GDocs-clone
+npm ci --legacy-peer-deps
 ```
 
-2. Install dependencies:
+The legacy peer-resolution flag is currently required because the pinned React 19 release candidate falls outside the peer range declared by the installed Liveblocks TipTap package. Remove the flag after those dependencies are aligned.
 
-```bash
-npm install
-```
+### Environment Variables
 
-3. Create a `.env.local` file in the project root:
+Create `.env.local` in the project root:
 
 ```bash
 CONVEX_DEPLOYMENT=
 NEXT_PUBLIC_CONVEX_URL=
-
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
-
 LIVEBLOCKS_SECRET_KEY=
 ```
 
-4. Set up Convex:
+Use development credentials from your own Clerk, Convex, and Liveblocks projects. Never commit real secret values.
+
+Convex authentication also needs the Clerk issuer configured in `convex/auth.config.ts`. Replace the existing deployment-specific `domain` value with the issuer for your own Clerk application before deploying.
+
+### Initialize Convex
 
 ```bash
 npx convex dev
 ```
 
-This will create or connect your Convex deployment and populate the Convex environment values needed by the app.
+Keep the Convex development process running while developing locally.
 
-5. Configure Clerk authentication for Convex.
+### Running Locally
 
-Update `convex/auth.config.ts` with your Clerk issuer domain:
-
-```ts
-export default {
-  providers: [
-    {
-      domain: "https://your-clerk-domain.clerk.accounts.dev",
-      applicationID: "convex",
-    },
-  ],
-};
-```
-
-Then run Convex again if needed:
-
-```bash
-npx convex dev
-```
-
-6. Start the development server:
+In a second terminal:
 
 ```bash
 npm run dev
 ```
 
-7. Open the app:
+Open [http://localhost:3000](http://localhost:3000).
 
-```bash
-http://localhost:3000
-```
+### Available Scripts
 
-## Environment Variables
-
-| Variable | Description |
+| Command | Purpose |
 | --- | --- |
-| `CONVEX_DEPLOYMENT` | Convex deployment identifier generated by Convex |
-| `NEXT_PUBLIC_CONVEX_URL` | Public Convex deployment URL used by the Next.js client |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key used by the client |
-| `CLERK_SECRET_KEY` | Clerk secret key used by server-side auth logic |
-| `LIVEBLOCKS_SECRET_KEY` | Liveblocks secret key used to authorize collaborative rooms |
-
-Do not commit `.env.local` or any real secret values to GitHub.
-
-## Available Scripts
-
-```bash
-npm run dev
-```
-
-Starts the Next.js development server.
-
-```bash
-npm run build
-```
-
-Builds the production application.
-
-```bash
-npm run start
-```
-
-Starts the production server after a successful build.
-
-```bash
-npm run lint
-```
-
-Runs the Next.js lint command.
+| `npm run dev` | Start the Next.js development server |
+| `npm run build` | Create a production build |
+| `npm run start` | Serve a completed production build |
+| `npm run lint` | Run the configured Next.js lint command |
 
 ## Project Structure
 
-```text
-docs-clone/
-|-- convex/
-|   |-- auth.config.ts      # Clerk auth provider config for Convex
-|   |-- documents.ts        # Document queries and mutations
-|   `-- schema.ts           # Convex database schema
-|-- public/                 # Static template previews and assets
-|-- src/
-|   |-- app/
-|   |   |-- (home)/         # Home page, document table, templates, search
-|   |   |-- api/            # API routes, including Liveblocks auth
-|   |   `-- documents/      # Document editor pages and collaboration room
-|   |-- components/         # Shared components and UI primitives
-|   |-- constants/          # App constants and document templates
-|   |-- extensions/         # TipTap custom extensions
-|   |-- hooks/              # Reusable React hooks
-|   |-- lib/                # Utility functions
-|   `-- store/              # Zustand editor store
-|-- liveblocks.config.ts    # Liveblocks type configuration
-|-- tailwind.config.ts      # Tailwind CSS configuration
-`-- package.json
-```
+| Path | Responsibility |
+| --- | --- |
+| `convex/` | Document schema, scoped list queries, mutations, and search indexes |
+| `src/app/(home)/` | Dashboard, search, templates, and document list |
+| `src/app/documents/[documentsId]/` | Editor shell, collaboration room, toolbar, comments, and document controls |
+| `src/app/api/liveblocks-auth/` | Server-side Liveblocks room authorization |
+| `src/components/` | Shared application components and UI primitives |
+| `src/constants/` | Template content and editor margin defaults |
+| `src/extensions/` | Custom TipTap extensions |
+| `src/store/` | Zustand editor state |
 
-## How It Works
+## Key Technical Highlights
 
-Users sign in through Clerk. Convex uses Clerk identity data to authorize document queries and mutations. Documents can belong to a single owner or to an organization, depending on the active Clerk organization.
+- Convex indexes support owner- and organization-scoped pagination plus full-text title search.
+- The Liveblocks authorization endpoint checks document ownership and organization membership before granting collaborative room access.
+- TipTap and Liveblocks combine rich-text editing with synchronized content, comments, mentions, presence, and shared layout settings.
+- Server and client responsibilities are separated between Next.js route handlers, Convex functions, and interactive editor components.
 
-When a user opens a document, the editor creates a Liveblocks room using the document ID. The `/api/liveblocks-auth` route checks whether the current user owns the document or belongs to the document organization, then grants Liveblocks room access.
+## Author
 
-The editor itself is built with TipTap and the Liveblocks TipTap extension, allowing document content, comments, mentions, cursors, and storage-backed page margins to sync in real time.
+**Chahin Boudra**
 
-## Deployment
+- GitHub: [@It-shahin](https://github.com/It-shahin)
+- LinkedIn: [chahin-boudra](https://www.linkedin.com/in/chahin-boudra/)
 
-The easiest deployment target for this app is Vercel.
-
-Before deploying:
-
-1. Push the repository to GitHub.
-2. Create production projects in Clerk, Convex, and Liveblocks.
-3. Add the production environment variables to your hosting provider.
-4. Configure the production Clerk issuer domain in `convex/auth.config.ts`.
-5. Deploy the Convex backend:
-
-```bash
-npx convex deploy
-```
-
-6. Deploy the Next.js app.
-
-## Notes
-
-- The app requires valid Clerk, Convex, and Liveblocks credentials before collaboration and document storage will work.
-- Liveblocks room access is authorized server-side in `src/app/api/liveblocks-auth/route.ts`.
-- Convex document access rules are implemented in `convex/documents.ts`.
-- Template definitions live in `src/constants/templates.ts`.
-
-## License
-
-This project is currently private and does not include a license. Add one before publishing if you want others to use, modify, or distribute it.
+> This independent portfolio project is inspired by Google Docs and is not affiliated with Google.
