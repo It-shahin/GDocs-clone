@@ -27,13 +27,17 @@ const getOrganizationId = (
 
 const isMemberOfOrganization = async (organizationId: string, userId: string) => {
   const clerk = await clerkClient();
-  const membership = await clerk.organizations.getOrganizationMembershipList({
-    organizationId,
-    userId: [userId],
-    limit: 1,
-  });
-
-  return membership.totalCount > 0;
+  let offset = 0;
+  while (true) {
+    const memberships = await clerk.users.getOrganizationMembershipList({
+      userId,
+      limit: 100,
+      offset,
+    });
+    if (memberships.data.some((entry) => entry.organization.id === organizationId)) return true;
+    offset += memberships.data.length;
+    if (memberships.data.length === 0 || offset >= memberships.totalCount) return false;
+  }
 };
 
 export async function POST(req: Request) {
