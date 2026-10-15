@@ -39,15 +39,19 @@ export async function getUsers(documentOrganizationId?: string) {
   }
 
   if (organizationId !== activeOrganizationId) {
-    const membership = await clerk.organizations.getOrganizationMembershipList({
-      organizationId,
-      userId: [userId],
-      limit: 1,
-    });
-
-    if (membership.totalCount === 0) {
-      return [];
+    let offset = 0;
+    let isMember = false;
+    while (!isMember) {
+      const memberships = await clerk.users.getOrganizationMembershipList({
+        userId,
+        limit: 100,
+        offset,
+      });
+      isMember = memberships.data.some((entry) => entry.organization.id === organizationId);
+      offset += memberships.data.length;
+      if (memberships.data.length === 0 || offset >= memberships.totalCount) break;
     }
+    if (!isMember) return [];
   }
 
   const response = await clerk.users.getUserList({
