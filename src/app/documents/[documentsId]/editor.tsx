@@ -24,7 +24,7 @@ import Highlight from "@tiptap/extension-highlight"
 import Link from "@tiptap/extension-link"
 
 import { FontSizeExtension } from "@/extensions/font-size";
-import { Ruler } from './ruler';
+import { Ruler } from './Ruler';
 
 import { useLiveblocksExtension } from "@liveblocks/react-tiptap";
 import { Threads } from './threads'
